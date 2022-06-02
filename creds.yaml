@@ -1,0 +1,6 @@
+avi_admin_password: "xxxxxx"
+avi_credentials:
+  controller: "x.x.x.x"
+  username: "xxxxxx"
+  password: "{{ avi_admin_password }}"
+  api_version: "21.1.3"
