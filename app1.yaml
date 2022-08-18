@@ -1,0 +1,190 @@
+avi_config:
+# ----------------------------------------------------------------------
+# VIP address and related dns are defined here
+# ----------------------------------------------------------------------
+  vsvip:
+    - name: vip1
+# all references using name seach fonction and not the UUID so the yaml is portable
+      vrf_context_ref: /api/vrfcontext/?name=global
+      tenant_ref: /api/tenant/?name=admin
+      cloud_ref: /api/cloud/?name=Default-Cloud
+      dns_info:
+      - algorithm: DNS_RECORD_RESPONSE_CONSISTENT_HASH
+        fqdn: test34.avilab.top
+        ttl: 5
+        type: DNS_RECORD_A
+      vip:
+      - vip_id: '1'
+        avi_allocated_fip: false
+        auto_allocate_ip: false
+        enabled: true
+        auto_allocate_floating_ip: false
+        avi_allocated_vip: false
+        auto_allocate_ip_type: V4_ONLY
+        ip_address:
+          type: V4
+          addr: 100.64.61.204
+# ----------------------------------------------------------------------
+# pool object where the backends servers and lb method are defined
+# ----------------------------------------------------------------------
+  pool:
+    - name: poule1
+# parameters below will apply to all servers in the pool
+      health_monitor_refs:
+        - /api/healthmonitor?name=System-HTTP
+        - /api/healthmonitor?name=System-Ping
+      analytics_policy:
+        enable_realtime_metrics: true
+      analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
+      lb_algorithm: LB_ALGORITHM_ROUND_ROBIN
+      lb_algorithm_core_nonaffinity: 2
+      lb_algorithm_hash: LB_ALGORITHM_CONSISTENT_HASH_SOURCE_IP_ADDRESS
+      lookup_server_by_name: false
+      ignore_server_port: false
+      inline_health_monitor: true
+      sni_enabled: true
+      tenant_ref: /api/tenant?name=admin
+      use_service_port: false
+      use_service_ssl_mode: false
+      max_concurrent_connections_per_server: 0
+      request_queue_depth: 128
+      request_queue_enabled: false
+      rewrite_host_header_to_server_name: false
+      rewrite_host_header_to_sni: false
+      routing_pool: false
+      server_disable_type: DISALLOW_NEW_CONNECTION
+      server_reselect:
+        enabled: false
+        num_retries: 4
+        retry_nonidempotent: false
+        retry_timeout: 0
+      server_timeout: 0
+      connection_ramp_duration: 10
+      default_server_port: 80
+      delete_server_on_dns_refresh: true
+      enable_http2: false
+      enabled: true
+      fewest_tasks_feedback_delay: 10
+      graceful_disable_timeout: 1
+      host_check_enabled: false
+      http2_properties:
+        max_http2_control_frames_per_connection: 0
+        max_http2_header_field_size: 4096
+      conn_pool_properties:
+        upstream_connpool_conn_idle_tmo: 200
+        upstream_connpool_conn_life_tmo: 2800
+        upstream_connpool_conn_max_reuse: 100
+        upstream_connpool_server_max_cache: 100
+# servers ip are defined below with individual parameters
+      servers:
+        - ip:
+           addr: 100.64.61.28
+           type: V4
+          ratio: 1
+          resolve_server_by_dns: false
+          rewrite_host_header: false
+          static: false
+          verify_network: false
+          enabled: true
+          hostname: 100.64.61.28
+          port: 8080
+          prst_hdr_val: perist1
+        - ip:
+           addr: 100.64.61.32
+           type: V4
+          ratio: 1
+          resolve_server_by_dns: false
+          rewrite_host_header: false
+          static: false
+          verify_network: false
+          enabled: true
+          hostname: 100.64.61.32
+          port: 8080
+          prst_hdr_val: perist1
+# ----------------------------------------------------------------------
+# Virtual service object that refer to vsvip , pool and various profiles
+# ----------------------------------------------------------------------
+  virtualservice:
+    - name: service-1
+      enabled: true
+# links to essentials objects 
+      tenant_ref: /api/tenant?name=admin
+      cloud_ref: /api/cloud?name=Default-Cloud
+      se_group_ref: /api/serviceenginegroup?name=Default-Group
+      vsvip_ref: /api/vsvip/?name=vip1
+      pool_ref: /api/pool?name=poule1
+# various profile can be linked below to acheive application customisation
+      application_profile_ref: /api/applicationprofile?name=System-Secure-HTTP
+      network_profile_ref: /api/networkprofile?name=System-TCP-Proxy
+      analytics_profile_ref: /api/analyticsprofile?name=System-Analytics-Profile
+      error_page_profile_ref: /api/errorpageprofile?name=Custom-Error-Page-Profile
+      ssl_profile_ref: /api/sslprofile?name=System-Standard
+      ssl_key_and_certificate_refs:
+        - /api/sslkeyandcertificate?name=System-Default-Cert
+# waf activation
+#      waf_policy_ref: /api/wafpolicy?name=System-WAF-Policy
+#
+#multiple ports and services can be activated below
+      services:
+        - port: 80
+          port_range_end: 80
+          enable_http2: false 
+          enable_ssl: false
+          horizon_internal_ports: false
+# note that 'is_active_ftp_data_port' has been indroduced in 22.1.1, must be commented to use 21.1.x avi version
+          is_active_ftp_data_port: false
+#          override_application_profile_ref: /api/applicationprofile?name=System-Secure-HTTP
+        - port: 443
+          port_range_end: 443
+          enable_http2: false
+          enable_ssl: true
+          horizon_internal_ports: false
+          is_active_ftp_data_port: false
+#          override_application_profile_ref: /api/applicationprofile?name=System-Secure-HTTP
+#
+# deep analytics can be activated from there
+      analytics_policy:
+        all_headers: true
+        client_insights: NO_INSIGHTS
+        full_client_logs:
+          duration: 0
+          enabled: true
+          throttle: 10
+        learning_log_policy:
+          enabled: true
+        metrics_realtime_update:
+          duration: 0
+          enabled: true
+        significant_log_throttle: 10
+      udf_log_throttle: 10
+#
+# optional virtual service paramateres can also be defined
+#      bulk_sync_kvcache: false
+#      close_client_conn_on_config_update: false
+#      cloud_type: CLOUD_VCENTER
+#      content_rewrite:
+#        rewritable_content_ref: /api/stringgroup?name=System-Rewritable-Content-Types
+#      delay_fairness: false
+#      east_west_placement: false
+#      enable_autogw: true
+#      flow_dist: LOAD_AWARE
+#      flow_label_type: NO_LABEL
+#      http_policies:
+#      - http_policy_set_ref: /api/httppolicyset?name=app1-46-HTTPPolicySet-0
+#        index: 11
+#      ign_pool_net_reach: false
+#      limit_doser: false
+#      max_cps_per_client: 0
+#      network_security_policy_ref: /api/networksecuritypolicy?name=app1-46-NetworkSecurityPolicy
+#      remove_listening_port_on_vs_down: false
+#      scaleout_ecmp: false
+#      ssl_sess_cache_avg_size: 1024
+#      traffic_enabled: true
+#      type: VS_TYPE_NORMAL
+#      use_bridge_ip_as_vip: false
+#      use_vip_as_snat: false
+#         sideband_profile:
+#           sideband_max_request_body_size: 1024
+#      active_standby_se_tag: ACTIVE_STANDBY_SE_1
+#      advertise_down_vs: false
+#      allow_invalid_client_cert: false

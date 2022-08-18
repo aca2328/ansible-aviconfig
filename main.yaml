@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  connection: local
+  collections:
+    - vmware.alb
+  tasks:
+    - name: activate the logs
+      set_fact:
+        avi_role_config_log_mode: 'False'
+    - name: Avi Application | Setup
+      import_role:
+        name: aviconfig
+      vars:
+        avi_creds_file: "creds.yaml"
+        avi_config_file: "app1.yaml"

@@ -2,8 +2,8 @@
 clear
 echo "---Virtual services, vip and pool provision using aviconfig role---"
 echo "-------------------------------------------------------------------"
-echo "use ansible-playbook vs.yaml --extra-vars avi_config_state=present to create ressources"
-echo "and ansible-playbook vs.yaml --extra-vars avi_config_state=absent to destroy ressources"
+echo "ansible-playbook main.yaml --extra-vars avi_config_state=present to create / modify application"
+echo "ansible-playbook main.yaml --extra-vars avi_config_state=absent to destroy application"
 echo "-------------------------------------------------------------------"
 ls -al | grep yaml
 docker kill alpaca
