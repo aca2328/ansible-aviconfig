@@ -1,5 +1,5 @@
 # ansible-aviconfig
-AVi provision using Aviconfig Ansible role
+this is a complete exemple of YAML file that will provision all the needed AVI objects ( Virtual Service, VSVIP , Pool ) using Aviconfig Ansible role
 
 # prerequises
 - docker installed
